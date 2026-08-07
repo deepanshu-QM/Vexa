@@ -1,0 +1,41 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id                 String           @id                       @default(uuid())            //Primary Key 
+  username           String
+  password           String
+  gender             Gender 
+  channelname        String
+  banner             String
+  profilepicture     String
+  subscribecount     Int              @default(0)
+  description        String
+
+}
+
+enum Gender {
+  male
+  female
+  other
+}
+
+model Uploads {
+  id                 String
+  videourl           String
+  slug               String
+  thumbnail          String
+  userId             String                //it means v1 or v2 belongs to which name of user.id
+  user               User                  @relation(fields : [userId], references : [id])
+}
