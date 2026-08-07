@@ -22,7 +22,7 @@ model User {
   profilepicture     String
   subscribecount     Int              @default(0)
   description        String
-
+  uploads            Uploads[]
 }
 
 enum Gender {
@@ -32,10 +32,16 @@ enum Gender {
 }
 
 model Uploads {
-  id                 String
+  id                 String           @id                       @default(uuid())
   videourl           String
   slug               String
   thumbnail          String
-  userId             String                //it means v1 or v2 belongs to which name of user.id
-  user               User                  @relation(fields : [userId], references : [id])
+  userId             String                /* it means v1 or v2 belongs to which name of user.id */
+  user               User                  @relation(fields: [userId], references: [id])
+}
+
+model Likes {
+  id                 String           @id                       @default(uuid())
+  userId             String 
+  uploadId           String
 }
