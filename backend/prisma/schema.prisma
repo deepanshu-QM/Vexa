@@ -17,7 +17,7 @@ model User {
   username           String
   password           String
   gender             Gender 
-  channelname        String
+  channelname        String          @unique
   banner             String
   profilepicture     String
   subscribecount     Int              @default(0)
@@ -34,10 +34,28 @@ enum Gender {
 model Uploads {
   id                 String           @id                       @default(uuid())
   videourl           String
-  slug               String
+  slug               String           @unique
   thumbnail          String
+  title              String           @db.VarChar(100)              /* this will Limits charcters */
+  description        String?
   userId             String                /* it means v1 or v2 belongs to which name of user.id */
-  user               User                  @relation(fields: [userId], references: [id])
+  user               User            @relation(fields: [userId], references: [id])
+  views              Int             @default(0)
+  Status             Status          @default(PROCESSING)
+  visibility         Visibility      @default(PUBLIC)
+  createdAt         DateTime         @default(now())
+}
+
+enum Status {
+  PROCESSING
+  READY
+  FAIL
+}
+
+enum Visibility {
+  PUBLIC
+  PRIVATE 
+  UNLISTED
 }
 
 model Likes {
