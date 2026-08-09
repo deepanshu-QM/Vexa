@@ -22,7 +22,13 @@ model User {
   profilepicture     String
   subscribecount     Int              @default(0)
   description        String
-  uploads            Uploads[]
+  uploads            Uploads[]   
+  likes              Likes[]   
+  comment            Comments[]  
+  subscriptions      Subscription[]   @relation("SubscriberSubscriptions") /* How many Channels Does user Subscribed */
+  subscribedChannels Subscription[]   @relation("ChannelSubscriptions")    /* Who subscribed to the channel? */
+  Commentlikes       CommentsLikes[]
+
 }
 
 enum Gender {
@@ -43,7 +49,9 @@ model Uploads {
   views              Int             @default(0)
   Status             Status          @default(PROCESSING)
   visibility         Visibility      @default(PUBLIC)
-  createdAt         DateTime         @default(now())
+  createdAt          DateTime         @default(now())
+  likes             Likes[]
+  comment           Comments[]
 }
 
 enum Status {
@@ -57,9 +65,59 @@ enum Visibility {
   PRIVATE 
   UNLISTED
 }
+model Subscription  {
+  id               String            @id                        @default(uuid())
+  subcriberId     String
+  subscriber       User             @relation("SubscriberSubscriptions", fields: [subcriberId], references: [id])
+  channelId       String
+  channel         User             @relation("ChannelSubscriptions", fields: [channelId], references: [id])
+  createdAt      DateTime          @default(now())
+   
+  @@unique([subcriberId,channelId])
 
-model Likes {
+}
+
+model Likes {                                                                             /*Likes on Uploded videos */
   id                 String           @id                       @default(uuid())
-  userId             String 
-  uploadId           String
+  userId             String
+  user               User           @relation(fields: [userId] , references: [id])
+  uploadId          String
+  upload            Uploads        @relation(fields :[uploadId], references: [id])   
+
+ @@unique([userId,uploadId])
+
+}
+
+model Comments {
+  id                String           @id                        @default(uuid())
+  content           String          @db.VarChar(1000)
+  userId             String
+  user               User           @relation(fields: [userId] , references: [id])
+  uploadId          String
+  upload            Uploads        @relation(fields :[uploadId], references: [id])   
+
+  parentId          String?
+  parent            Comments?       @relation( "Replies", fields: [parentId],references: [id])
+  replies            Comments[]      @relation("Replies")
+
+ likes              CommentsLikes[]  @relation("Likes on Comments")
+ likesCount         Int              @default(0)
+
+ createdAt          DateTime         @default(now())
+ updatedAt          DateTime         @updatedAt
+ @@index([userId,uploadId])
+
+}
+ 
+model CommentsLikes {                                                                 /* Likes on both uploded Video comments and comments Reply */
+  id               String          @id                     @default(uuid())
+  userId             String
+  user               User           @relation(fields: [userId] , references: [id])
+
+  commentId         String
+  comment           Comments         @relation("Likes on Comments", fields: [commentId], references: [id])
+  createdAt          DateTime       @default(now())
+
+  @@unique([userId,commentId])
+
 }
