@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 import {z} from "zod";
 import {prisma} from "./db";
 import {SignSchema,SignupSchema} from "./validation";
+import { authMiddleware } from "./middleware";
 
 const app = express();
 app.use(cors());
@@ -85,5 +86,26 @@ app.post("/sigin", async(req,res) => {
         return res.status(500).json({
             message : "something wents Wrong"
         })
+    }
+})
+
+app.get("/upload",authMiddleware,async(req,res) => {
+    const userId = req.userId;
+    if(!userId){
+        res.status(401).json({
+            message : "Unauthorized"
+        })
+    }
+    try {
+        const user = await prisma.user.findUnique({
+            where :{
+                id:userId
+            }
+        });
+        if(!user){
+            res.status(401).json({
+                message :"Unauthorized"
+            })
+        }
     }
 })
